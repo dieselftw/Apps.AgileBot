@@ -1,0 +1,48 @@
+{
+    "id": "a056c6fd-b2ca-4db8-8c54-0f206a4bf7ae",
+    "version": "0.0.1",
+    "requiredApiVersion": "^1.19.0",
+    "iconFile": "icon.png",
+    "author": {
+        "name": "Hardik Bhatia",
+        "homepage": "portfolio-hardikbhatia777.vercel.app",
+        "support": "linkedin.com/bhatia-hardik"
+    },
+    "name": "agile-bot",
+    "nameSlug": "agile-bot",
+    "classFile": "AgileBotApp.ts",
+    "description": "Agile Bot GSoC '24",
+    "permissions": [
+        {
+            "name": "user.read"
+        },
+        {
+            "name": "user.write"
+        },
+        {
+            "name": "room.read"
+        },
+        {
+            "name": "room.write"
+        },
+        {
+            "name": "message.read"
+        },
+        {
+            "name": "message.write"
+        },
+        {
+            "name": "slashcommand"
+        },
+        {
+            "name": "api"
+        },
+        {
+            "name": "networking"
+        },
+        {
+            "name": "threads.read"
+        }
+    ],
+    "implements": []
+}
