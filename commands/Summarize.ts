@@ -140,7 +140,6 @@ export class SummarizeCommand implements ISlashCommand {
             }
         }
 
-        // threadReader repeats the first message once, so here we remove it
         messageTexts.shift();
         return messageTexts.join(" // ");
     }
@@ -159,13 +158,10 @@ export class SummarizeCommand implements ISlashCommand {
             throw new Error("Thread not found");
         }
     
-        // Retrieve all users in the room as IUser objects
         const usersInRoom = await read.getRoomReader().getMembers(room.id);
     
-        // Extract the usernames of users in the room
         const usernamesInRoom = usersInRoom.map(user => user.name);
     
-        // Extract the names of users who posted messages in the thread
         const usersWhoPosted = new Set<string>();
         for (const message of thread) {
             if (message.sender && message.sender.name) {
@@ -173,14 +169,17 @@ export class SummarizeCommand implements ISlashCommand {
             }
         }
     
-        // Get the usernames of users who did not post any message
         const usersNotPosted = usernamesInRoom.filter(name => !usersWhoPosted.has(name));
-    
-        // Return the result as a string separated by "--"
+
         return usersNotPosted.join("--");
     }
     
-    private async sendMessage(room: IRoom, textMessage: string, author: IUser, modify: IModify, threadId? : string) {
+    private async sendMessage(
+        room: IRoom, 
+        textMessage: string, 
+        author: IUser, 
+        modify: IModify, 
+        threadId? : string): Promise<string> {
         const messageBuilder = modify.getCreator().startMessage({
             text: textMessage,
         } as IMessage);

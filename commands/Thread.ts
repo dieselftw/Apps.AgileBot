@@ -10,6 +10,8 @@ import {
     SlashCommandContext,
 } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { ISettingRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { AppSettingsEnum } from '../settings';
 
 export class ThreadInit implements ISlashCommand {
     public command = 'scrum';
@@ -18,11 +20,12 @@ export class ThreadInit implements ISlashCommand {
     public providesPreview: boolean = false;
    
     public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp, persis: IPersistence): Promise<void> {
-        const user = context.getSender();
+        const author = context.getSender();
+        const user = await read.getUserReader().getAppUser();
         const room: IRoom = context.getRoom();
-       
-        const message = "@all **Biweekly update time! ** \n\n 1. What have you been working on? \n 2. Blockers? \n 3. Next plans?";
-        await this.sendMessageToRoom(room, modify, user, message);
+
+        const message = await read.getEnvironmentReader().getSettings().getValueById(AppSettingsEnum.ScrumMessage);
+        await this.sendMessageToRoom(room, modify, user ?? author, message);
     }
    
     private async sendMessageToRoom(room: IRoom, modify: IModify, sender: IUser, message: string): Promise<void> {
