@@ -3,6 +3,7 @@ import {
     IModify,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
+import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import {
     ISlashCommand,
@@ -23,6 +24,7 @@ export class SummarizeCommand implements ISlashCommand {
         http: IHttp
     ): Promise<void> {
         const user = context.getSender();
+        const author = await read.getUserReader().getAppUser();
         const room = context.getRoom();
         const threadId = context.getThreadId();
 
@@ -30,28 +32,36 @@ export class SummarizeCommand implements ISlashCommand {
             await this.notifyMessage(
                 room,
                 read,
-                user,
+                context.getSender(),
                 "You can only call /summarize in a thread"
             );
-            throw new Error("You can only call /summarize-thread in a thread");
+            throw new Error("You can only call /summarize in a thread");
         }
 
         const messages = await this.getThreadMessages(
             room,
             read,
-            user,
+            context.getSender(),
             threadId
         );
+
+        const notPosted = await this.getNotPosted(
+            room,
+            read,
+            context.getSender(),
+            threadId
+        )
 
         const summary = await this.summarizeMessages(
             room,
             read,
-            user,
+            context.getSender(),
             http,
-            messages
+            messages,
+            notPosted
         );
 
-        await this.notifyMessage(room, read, user, summary, threadId);
+        await this.sendMessage(room, summary, author ?? user, modify, threadId);
     }
 
     private async summarizeMessages(
@@ -59,31 +69,29 @@ export class SummarizeCommand implements ISlashCommand {
         read: IRead,
         user: IUser,
         http: IHttp,
-        messages: string
+        messages: string,
+        notPosted: string,
     ): Promise<string> {
-        const url = "http://mistral-7b/v1"
-        const model = "mistral"
+        const url = "http://llama3-70b/v1"
+        const model = "llama3"
 
         const body = {
             model,
             messages: [
                 {
                     role: "system",
-                    content: `You are an assistant designed to help summarize daily updates from engineers. Each update should include three key points:
-
-                    Progress: What has been accomplished.
-                    Blockers: Any issues or obstacles encountered.
-                    Next Steps: What will be worked on next.
+                    content: `You are an assistant designed to help summarize daily updates from engineers. Follow this format:
                 
-                Summarize the posted messages from each engineer in a brief and clear format, including these three points. Use the following template for each engineer:
-                
-                (Name of engineer)
-                
+                ### (Name of engineer)
+                [Leave one line]
                     ** Progress **: [Brief summary of what was completed]
                     ** Blockers **: [Brief summary of any issues]
                     ** Next Steps **: [Brief summary of planned tasks]
 
-                Maintain proper spacing between the fields and points and briefly summarize the messages in the thread, which are separated by double slashes (//): ${messages}`,
+                Briefly summarize the following messages only, separated by double slashes (//): ${messages}
+                
+                Mention these people who haven't posted an update. If empty, say "Everyone posted an update!": ${notPosted}
+                `,
                 },
             ],
             temperature: 0,
@@ -135,6 +143,53 @@ export class SummarizeCommand implements ISlashCommand {
         // threadReader repeats the first message once, so here we remove it
         messageTexts.shift();
         return messageTexts.join(" // ");
+    }
+
+    private async getNotPosted(
+        room: IRoom,
+        read: IRead,
+        user: IUser,
+        threadId: string
+    ) {
+        const threadReader = read.getThreadReader();
+        const thread = await threadReader.getThreadById(threadId);
+    
+        if (!thread) {
+            await this.notifyMessage(room, read, user, "Thread not found");
+            throw new Error("Thread not found");
+        }
+    
+        // Retrieve all users in the room as IUser objects
+        const usersInRoom = await read.getRoomReader().getMembers(room.id);
+    
+        // Extract the usernames of users in the room
+        const usernamesInRoom = usersInRoom.map(user => user.name);
+    
+        // Extract the names of users who posted messages in the thread
+        const usersWhoPosted = new Set<string>();
+        for (const message of thread) {
+            if (message.sender && message.sender.name) {
+                usersWhoPosted.add(message.sender.name);
+            }
+        }
+    
+        // Get the usernames of users who did not post any message
+        const usersNotPosted = usernamesInRoom.filter(name => !usersWhoPosted.has(name));
+    
+        // Return the result as a string separated by "--"
+        return usersNotPosted.join("--");
+    }
+    
+    private async sendMessage(room: IRoom, textMessage: string, author: IUser, modify: IModify, threadId? : string) {
+        const messageBuilder = modify.getCreator().startMessage({
+            text: textMessage,
+        } as IMessage);
+        messageBuilder.setRoom(room);
+        messageBuilder.setSender(author);
+        if (threadId){
+            messageBuilder.setThreadId(threadId);
+        }
+        return modify.getCreator().finish(messageBuilder);
     }
 
     private async notifyMessage(

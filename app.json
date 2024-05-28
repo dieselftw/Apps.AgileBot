@@ -8,7 +8,7 @@
         "homepage": "portfolio-hardikbhatia777.vercel.app",
         "support": "linkedin.com/bhatia-hardik"
     },
-    "name": "agile-bot",
+    "name": "Agile Bot",
     "nameSlug": "agile-bot",
     "classFile": "AgileBotApp.ts",
     "description": "Agile Bot GSoC '24",
