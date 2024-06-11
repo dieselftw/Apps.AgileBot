@@ -20,6 +20,9 @@
             "name": "user.write"
         },
         {
+            "name": "ui.interact"
+        },
+        {
             "name": "room.read"
         },
         {
@@ -45,6 +48,9 @@
         },
         {
             "name": "ui.registerButtons"
+        },
+        {
+            "name": "persistence"
         }
     ],
     "implements": []

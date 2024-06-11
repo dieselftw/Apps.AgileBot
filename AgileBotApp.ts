@@ -10,14 +10,17 @@ import { App } from "@rocket.chat/apps-engine/definition/App";
 import { IAppInfo } from "@rocket.chat/apps-engine/definition/metadata";
 import { SummarizeCommand } from "./commands/Summarize";
 import { ThreadInit } from "./commands/Thread";
+import { AgileSettings } from "./commands/AgileSettings";
 import { AppSettingsEnum, settings } from "./settings";
 import { ISetting } from "@rocket.chat/apps-engine/definition/settings";
 import {UIActionButtonContext } from '@rocket.chat/apps-engine/definition/ui';
 import { UIKitActionButtonInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 import { IPersistence, IModify } from "@rocket.chat/apps-engine/definition/accessors";
 import { IUIKitResponse } from "@rocket.chat/apps-engine/definition/uikit";
-import { AgileModal } from "./handlers/AgileModal";
 import { UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
+import { ExecuteBlockActionHandler } from "./handlers/ExecuteBlockActionHandler";
+import { ExecuteViewSubmitHandler } from "./handlers/ExecuteViewSubmitHandler";
+import { UIKitViewSubmitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 
 export class AgileBotApp extends App {
     constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -61,6 +64,7 @@ export class AgileBotApp extends App {
     public async extendConfiguration(configuration: IConfigurationExtend) {
         configuration.slashCommands.provideSlashCommand(new SummarizeCommand());
         configuration.slashCommands.provideSlashCommand(new ThreadInit());
+        configuration.slashCommands.provideSlashCommand(new AgileSettings(this));
         configuration.ui.registerButton({
             actionId: 'agile-modal',
             labelI18n: 'agile_modal_description',
