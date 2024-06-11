@@ -42,6 +42,9 @@
         },
         {
             "name": "threads.read"
+        },
+        {
+            "name": "ui.registerButtons"
         }
     ],
     "implements": []
