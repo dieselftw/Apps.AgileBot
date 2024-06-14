@@ -4,14 +4,14 @@ import {
     IPersistence,
     IRead,
 } from "@rocket.chat/apps-engine/definition/accessors";
-import { AgileBotApp } from "../AgileBotApp";
+import { AgileBotApp } from "../../AgileBotApp";
 
 import {
     IUIKitResponse,
     UIKitBlockInteractionContext,
 } from "@rocket.chat/apps-engine/definition/uikit";
 
-import { AgileModal } from "../modals/AgileModal";
+import { AgileModal } from "../../modals/agile-settings/AgileModal";
 
 export class ExecuteBlockActionHandler {
     constructor(
@@ -36,7 +36,6 @@ export class ExecuteBlockActionHandler {
             uiKitContext: context,
         });
 
-        // [9] we update the contextual bar's content.
         await this.modify
             .getUiController()
             .updateModalView(

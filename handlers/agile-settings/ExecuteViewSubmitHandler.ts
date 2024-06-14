@@ -6,9 +6,10 @@ import {
 } from "@rocket.chat/apps-engine/definition/accessors";
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { UIKitViewSubmitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
-import { AgileBotApp } from "../AgileBotApp";
-import { sendNotification } from "../lib/messages";
-import { getInteractionRoomData } from "../lib/roomInteraction";
+import { AgileBotApp } from "../../AgileBotApp";
+import { sendNotification } from "../../lib/agile-settings/messages";
+import { storeOrUpdateData, removeAllData } from "../../modals/agile-settings/AgileModal";
+import { getInteractionRoomData } from "../../lib/agile-settings/roomInteraction";
 
 export class ExecuteViewSubmitHandler {
     constructor(
@@ -43,17 +44,21 @@ export class ExecuteViewSubmitHandler {
 
         let room = (await this.read.getRoomReader().getById(roomId)) as IRoom;
 
-        const selectedModel =
-            view.state?.["selectModelBlockId"]["selectModelBlockId"] || "";
-        const prompt = view.state?.["promptBlockId"]["promptBlockId"] || "";
+        const agileMessage = view.state?.["agileMessage"]["agileMessage"] || "";
+        const selectDays = view.state?.["selectDays"]["selectDays"] || "";
+        const time = view.state?.["agileTime"]["agileTime"] || "";
 
         await sendNotification(
             this.read,
             this.modify,
             user,
             room,
-            `abcd`
+            "Saved successfully",
         );
+
+        await storeOrUpdateData(this.persistence, this.read, roomId, "agile_message", agileMessage);
+        await storeOrUpdateData(this.persistence, this.read, roomId, "agile_days", selectDays);
+        await storeOrUpdateData(this.persistence, this.read, roomId, "agile_time", time);
 
         return {
             success: true,

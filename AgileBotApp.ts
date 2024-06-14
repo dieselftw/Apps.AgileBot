@@ -18,8 +18,8 @@ import { UIKitActionButtonInteractionContext } from "@rocket.chat/apps-engine/de
 import { IPersistence, IModify } from "@rocket.chat/apps-engine/definition/accessors";
 import { IUIKitResponse } from "@rocket.chat/apps-engine/definition/uikit";
 import { UIKitBlockInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
-import { ExecuteBlockActionHandler } from "./handlers/ExecuteBlockActionHandler";
-import { ExecuteViewSubmitHandler } from "./handlers/ExecuteViewSubmitHandler";
+import { ExecuteBlockActionHandler } from "./handlers/agile-settings/ExecuteBlockActionHandler";
+import { ExecuteViewSubmitHandler } from "./handlers/agile-settings/ExecuteViewSubmitHandler";
 import { UIKitViewSubmitInteractionContext } from "@rocket.chat/apps-engine/definition/uikit";
 
 export class AgileBotApp extends App {
@@ -65,11 +65,6 @@ export class AgileBotApp extends App {
         configuration.slashCommands.provideSlashCommand(new SummarizeCommand());
         configuration.slashCommands.provideSlashCommand(new ThreadInit());
         configuration.slashCommands.provideSlashCommand(new AgileSettings(this));
-        configuration.ui.registerButton({
-            actionId: 'agile-modal',
-            labelI18n: 'agile_modal_description',
-            context: UIActionButtonContext.ROOM_ACTION,
-        });
 
 
         await Promise.all(

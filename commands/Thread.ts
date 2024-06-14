@@ -10,8 +10,8 @@ import {
     SlashCommandContext,
 } from '@rocket.chat/apps-engine/definition/slashcommands';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { ISettingRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { AppSettingsEnum } from '../settings';
+import { RocketChatAssociationRecord, RocketChatAssociationModel } from '@rocket.chat/apps-engine/definition/metadata';
+import { IAgileSettingsPersistenceData } from '../definitions/agile-settings/ExecutorProps';
 
 export class ThreadInit implements ISlashCommand {
     public command = 'scrum';
@@ -23,8 +23,14 @@ export class ThreadInit implements ISlashCommand {
         const author = context.getSender();
         const user = await read.getUserReader().getAppUser();
         const room: IRoom = context.getRoom();
+        let message = "";
 
-        const message = await read.getEnvironmentReader().getSettings().getValueById(AppSettingsEnum.ScrumMessage);
+        const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, room.id);
+        const data = (await read.getPersistenceReader().readByAssociation(assoc)) as IAgileSettingsPersistenceData[];
+        if (data && data.length > 0) {
+            message = data[0].agile_message;
+        }
+
         await this.sendMessageToRoom(room, modify, user ?? author, message);
     }
    

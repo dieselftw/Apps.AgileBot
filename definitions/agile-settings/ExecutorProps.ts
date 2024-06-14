@@ -7,7 +7,7 @@ import {
 import { IRoom } from "@rocket.chat/apps-engine/definition/rooms";
 import { SlashCommandContext } from "@rocket.chat/apps-engine/definition/slashcommands";
 import { IUser } from "@rocket.chat/apps-engine/definition/users";
-import { AgileBotApp } from "../AgileBotApp";
+import { AgileBotApp } from "../../AgileBotApp";
 
 export interface ExecutorProps {
     sender: IUser;
@@ -19,4 +19,10 @@ export interface ExecutorProps {
     http: IHttp;
     persistence: IPersistence;
     app: AgileBotApp;
+}
+
+export interface IAgileSettingsPersistenceData {
+    agile_message: string;
+    agile_time: string;
+    agile_days: string[];
 }
